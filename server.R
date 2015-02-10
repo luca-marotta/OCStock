@@ -44,17 +44,17 @@ shinyServer(function(input, output) {
       mergemat <- t(hcInput()$merge)
       cmat <- cmat[abs(mergemat[mergemat<0]), abs(mergemat[mergemat<0])]
       df <- reshape2::melt(cmat);
-      p <- ggplot(data=df, aes(x=Var1, y=Var2)) + 
-        geom_tile(aes(fill=value)) +
+      p <- ggplot(data=df, aes(x=Var1, y=Var2, fill=value)) + 
+        geom_raster() +
         scale_fill_gradient(low = "#0000FF", high ="#FF0000", 
-                             space = "rgb", guide = "colourbar")
+                             space = "rgb", guide = "colourbar", na.value = "#DADAC8")
       return(p)
     }
     df <- melt(cmat)
     p <- ggplot(data=df, aes(x=Var1, y=Var2)) + 
          geom_tile(aes(fill=value))+
          scale_fill_gradient(low = "#0000FF", high ="#FF0000", 
-                        space = "rgb", guide = "colourbar")
+                        space = "rgb", guide = "colourbar", na.value = "#DADAC8")
     return(p)
 })
 
@@ -73,10 +73,13 @@ mstInput <- reactive({
     mst <- minimum.spanning.tree(g);
     nodes <- get.data.frame(mst, what = "vertices");
     nodes$group <- 1;
-    links <- as.data.frame(get.edgelist(mst, names = F)) - 1;
+    #links <- as.data.frame(get.edgelist(mst, names = F)) - 1;
+    links <- as.data.frame(get.edgelist(mst));
+  
     colnames(links) <- c("source", "target");
     links$value <- 20; 
-    return(list(links=links, nodes=nodes))
+    #return(list(links=links, nodes=nodes))
+    return(links)
   
 })
 
@@ -98,11 +101,13 @@ mstInput <- reactive({
     
   })
   
-  output$mstplot <- renderForceNetwork({
+  #output$mstplot <- renderForceNetwork({
+   output$mstplot <- renderSimpleNetwork({
     if(input$mst == 0) return(NULL)
-                          forceNetwork(Links = mstInput()$links, Nodes = mstInput()$nodes, 
-                          Source = "source", Target="target", Value = "value", 
-                          NodeID = "name", Group = "group", opacity = 1)
+#                           forceNetwork(Links = mstInput()$links, Nodes = mstInput()$nodes, 
+#                           Source = "source", Target="target", Value = "value", 
+#                           NodeID = "name", Group = "group", opacity = 1)
+          simpleNetwork(mstInput(), fontSize = 12)
 })
 
 

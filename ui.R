@@ -102,7 +102,8 @@ shinyUI(fluidPage(
       helpText(h2("Hierarchical Tree", align = "center")),
       plotOutput("hclustplot"),
       helpText(h2("Minimum Spanning tree", align = "center")),
-      forceNetworkOutput("mstplot")
+      #forceNetworkOutput("mstplot")
+      simpleNetworkOutput("mstplot")
       
     )
 )))
