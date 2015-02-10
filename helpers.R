@@ -139,6 +139,7 @@ getData <- function(tickers, from, to){
   title(main)
   if(boxes){
     box()
+    #axis(4, cex.axis=1.8)
     axis(4, cex.axis=1.8)
   }
   
@@ -183,7 +184,7 @@ getData <- function(tickers, from, to){
     obs.labels <- toupper(substr(x$labels[x$order],1,6))
     if(is.null(members)) {
       plot(0,type="n",xlim=c(0.5,n.indiv+.5), ylim=c(0,1), xaxs="i", axes=FALSE, xlab="",ylab="") 
-      text(1:n.indiv            , 0, obs.labels, pos=4, col=col.down[groups.o], cex=1.8)
+      text(1:n.indiv            , 0, obs.labels, pos=4, col=col.down[groups.o], cex=1)
     }
     else{
       plot(0,type="n",xlim=c(0.5,sum(members)+.5), ylim=c(0,1), xaxs="i", axes=FALSE, xlab="",ylab="") 
