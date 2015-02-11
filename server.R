@@ -15,6 +15,8 @@ source("helpers.R")
 
 
 shinyServer(function(input, output) {
+  
+
   dataInput <- reactive({
     if(input$get==0) return(NULL)
     isolate({getData(input$symb, from = input$dates[1], input$dates[2])
@@ -36,7 +38,7 @@ shinyServer(function(input, output) {
 #    }
     
     
-    tmp <- dataInput()
+    tmp <- dataInput()$data
     cmat <- cor(tmp[,2:ncol(tmp)])
     diag(cmat) <- NA
     if(input$corr){
@@ -59,7 +61,7 @@ shinyServer(function(input, output) {
 })
 
 hcInput <- reactive({
-  tmp <- dataInput();
+  tmp <- dataInput()$data;
   distmat <- as.dist(sqrt(2*(1-cor(tmp[,2:ncol(tmp)]))));
   return(hclust(distmat, method="single"));
   
@@ -67,7 +69,7 @@ hcInput <- reactive({
 
 mstInput <- reactive({ 
   if(!input$mst) return(list(links=data.frame(`source`=1, target=1, value=0 ), nodes=data.frame(name=1, group=1)))
-    tmp <- dataInput()
+    tmp <- dataInput()$data
     adj <- sqrt(2*(1 - cor(tmp[,2:ncol(tmp)])));
     g <- graph.adjacency(adj, mode = "undirected", weighted="weight");
     mst <- minimum.spanning.tree(g);
@@ -85,8 +87,16 @@ mstInput <- reactive({
 
   output$retplot <- renderDygraph({
     if(input$get==0) return(NULL)
-    dygraph(xts(dataInput()[,2:ncol(dataInput())], order.by = as.Date(dataInput()$Date, format="%Y-%m-%d")))
+    dygraph(xts(dataInput()$data[,2:ncol(dataInput()$data)], order.by = as.Date(dataInput()$data$Date, format="%Y-%m-%d")))
   })
+
+output$tsMergeWarning <- renderText({
+  if(input$get==0) return(NULL)
+  if(input$dates[1] == dataInput()$finDate[1]) return(NULL)
+  #if(1==1) return(input$dates[1] == dataInput()$finDate[1])
+  paste(dataInput()$minStock, " has records only starting from ", dataInput()$finDate[1], 
+       ". Your input date range has been changed accordingly.", sep="")
+})
 
   output$corrplot <- renderPlot({
     if(input$get == 0) return(NULL)
