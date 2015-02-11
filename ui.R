@@ -19,11 +19,12 @@ shinyUI(fluidPage(
         end = as.character(Sys.Date())),
    
       actionButton("get", "Get Stock"),
-      
       br(),
       br(),
       br(),
       br(),
+      checkboxInput("hideTsLeg", "Hide legend in plot", 
+                    value = FALSE),
       br(),
       br(),
       br(),
