@@ -23,6 +23,19 @@ shinyServer(function(input, output) {
     })
   })
   
+  
+  tsInput <- reactive({
+    if(input$hideTsLeg==T){
+      return(
+        dygraph(xts(dataInput()$data[,2:ncol(dataInput()$data)], order.by = as.Date(dataInput()$data$Date, format="%Y-%m-%d")))%>%
+        dyLegend(show = "onmouseover", width = 0)
+      )
+    }
+    return(dygraph(xts(dataInput()$data[,2:ncol(dataInput()$data)], order.by = as.Date(dataInput()$data$Date, format="%Y-%m-%d")))%>%
+             dyLegend(show = "always", hideOnMouseOut = T, width=400))
+  })
+  
+  
   corrInput <- reactive({
     if(input$get==0) return(NULL)
 #    if(!input$corr){
@@ -87,7 +100,7 @@ mstInput <- reactive({
 
   output$retplot <- renderDygraph({
     if(input$get==0) return(NULL)
-    dygraph(xts(dataInput()$data[,2:ncol(dataInput()$data)], order.by = as.Date(dataInput()$data$Date, format="%Y-%m-%d")))
+    tsInput();
   })
 
 output$tsMergeWarning <- renderText({
