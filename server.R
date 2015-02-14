@@ -35,7 +35,14 @@ shinyServer(function(input, output) {
              dyLegend(show = "always", hideOnMouseOut = T, width=400))
   })
   
-  
+
+  hcInput <- reactive({
+    tmp <- dataInput()$data;
+    distmat <- as.dist(sqrt(2*(1-cor(tmp[,2:ncol(tmp)]))));
+    return(hclust(distmat, method="single"));
+    
+  })
+    
   corrInput <- reactive({
     if(input$get==0) return(NULL)
 #    if(!input$corr){
@@ -52,33 +59,36 @@ shinyServer(function(input, output) {
     
     
     tmp <- dataInput()$data
+
     cmat <- cor(tmp[,2:ncol(tmp)])
     diag(cmat) <- NA
+    df <- reshape2::melt(cmat)
     if(input$corr){
       ######## ordering columns using hc
-      mergemat <- t(hcInput()$merge)
-      cmat <- cmat[abs(mergemat[mergemat<0]), abs(mergemat[mergemat<0])]
-      df <- reshape2::melt(cmat);
+      hc <- hcInput()
+      df <- data.frame(Var1=factor(df$Var1, levels = hc$labels[rev(hc$order)]),
+                       Var2=factor(df$Var2, levels = hc$labels[rev(hc$order)]), 
+                       value=df$value);
+      
       p <- ggplot(data=df, aes(x=Var1, y=Var2, fill=value)) + 
-        geom_raster() +
+        geom_raster(color="white") + xlab("") + ylab("") +
         scale_fill_gradient(low = "#0000FF", high ="#FF0000", 
-                             space = "rgb", guide = "colourbar", na.value = "#DADAC8")
+                             space = "rgb", guide = "colourbar", na.value = "#DADAC8") +
+        theme_classic(base_size = 15) + 
+        theme(axis.text.x=element_text(size=input$corrLSize, angle=90, face="bold", vjust=0.5),
+              axis.text.y=element_text(size=input$corrLSize, face="bold"))
       return(p)
     }
-    df <- melt(cmat)
     p <- ggplot(data=df, aes(x=Var1, y=Var2)) + 
-         geom_tile(aes(fill=value))+
+         geom_tile(aes(fill=value)) +  xlab("") + ylab("") +
          scale_fill_gradient(low = "#0000FF", high ="#FF0000", 
-                        space = "rgb", guide = "colourbar", na.value = "#DADAC8")
+                        space = "rgb", guide = "colourbar", na.value = "#DADAC8") +
+      theme_classic(base_size = 15) + 
+      theme(axis.text.x=element_text(size=input$corrLSize, angle=90, face="bold", vjust=0.5),
+          axis.text.y=element_text(size=input$corrLSize, face="bold"))
     return(p)
 })
 
-hcInput <- reactive({
-  tmp <- dataInput()$data;
-  distmat <- as.dist(sqrt(2*(1-cor(tmp[,2:ncol(tmp)]))));
-  return(hclust(distmat, method="single"));
-  
-})
 
 mstInput <- reactive({ 
   if(!input$mst) return(list(links=data.frame(`source`=1, target=1, value=0 ), nodes=data.frame(name=1, group=1)))

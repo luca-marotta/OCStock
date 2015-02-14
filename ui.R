@@ -44,6 +44,7 @@ shinyUI(fluidPage(
       br(),
       br(),
       br(),
+      sliderInput("corrLSize", "Select label size", min = 6, max=22, value=15),
       br(),
       br(),
       br(),
@@ -102,12 +103,12 @@ shinyUI(fluidPage(
       br(),
       textOutput("tsMergeWarning"),
       helpText(h2("Correlation Matrix", align = "center")),
-      plotOutput("corrplot"),
+      plotOutput("corrplot", width = "100%"),
       helpText(h2("Hierarchical Tree", align = "center")),
       plotOutput("hclustplot"),
       helpText(h2("Minimum Spanning tree", align = "center")),
       #forceNetworkOutput("mstplot")
-      simpleNetworkOutput("mstplot")
+      simpleNetworkOutput("mstplot", height = "1000px")
       
     )
 )))
