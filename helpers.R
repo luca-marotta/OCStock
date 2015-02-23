@@ -1,7 +1,7 @@
 getData <- function(tickers, from, to){
   # list that will contain the results
-  if(tickers=="Select all") tickers <- c("AAPL","ABBV","ABT","ACN","AIG","ALL","AMGN","AMZN","APA","APC","AXP","BA","BAC","BAX","BIIB","BK","BMY","BRK.B","C","CAT","CL","CMCSA","COF","COP","COST","CSCO","CVS","CVX","DD","DIS","DOW","DVN","EBAY","EMC","EMR","EXC","F","FB","FCX","FDX","FOXA","GD","GE","GILD","GM","GS","HAL","HD","HON","HPQ","IBM","INTC","JNJ","JPM","KO","LLY","LMT","LOW","MA","MCD","MDLZ","MDT","MET","MMM","MO","MON","MRK","MS","MSFT","NKE","NOV","NSC","ORCL","OXY","PEP","PFE","PG","PM","QCOM","RTN","SBUX","SLB","SO","SPG","T","TGT","TWX","TXN","UNH","UNP","UPS","USB","UTX","V","VZ","WBA","WFC","WMT","XOM")
-  res <- vector(mode = "list", length = length(tickers));
+  #if(any(tickers%in%"Select all")) tickers <- c("AAPL","ABBV","ABT","ACN","AIG","ALL","AMGN","AMZN","APA","APC","AXP","BA","BAC","BAX","BIIB","BK","BMY","BRK.B","C","CAT","CL","CMCSA","COF","COP","COST","CSCO","CVS","CVX","DD","DIS","DOW","DVN","EBAY","EMC","EMR","EXC","F","FB","FCX","FDX","FOXA","GD","GE","GILD","GM","GS","HAL","HD","HON","HPQ","IBM","INTC","JNJ","JPM","KO","LLY","LMT","LOW","MA","MCD","MDLZ","MDT","MET","MMM","MO","MON","MRK","MS","MSFT","NKE","NOV","NSC","ORCL","OXY","PEP","PFE","PG","PM","QCOM","RTN","SBUX","SLB","SO","SPG","T","TGT","TWX","TXN","UNH","UNP","UPS","USB","UTX","V","VZ","WBA","WFC","WMT","XOM")
+  #res <- vector(mode = "list", length = length(tickers));
   
   # creating URL for download
   yahoo.URL <- "http://ichart.finance.yahoo.com/table.csv?"
@@ -24,17 +24,20 @@ getData <- function(tickers, from, to){
                 "&d=", to.m, "&e=", sprintf("%.2d", to.d), "&f=", 
                 to.y, "&g=d&q=q&y=0", "&z=", tickers, "&x=.csv", 
                 sep = "");
-  res <- lapply(path, function(x)  read.csv(file = x));
+  res <- lapply(path, function(x)  tryCatch(read.csv(file = x), error=function(e){return(NULL)}));
+  nfi <- sapply(res, is.null)
+  not.found <- tickers[nfi]
+  res <- res[!nfi]
   #### checking for the stock with minimum records
   records <- sapply(res, nrow);
   ind.min <- which.min(records)
-  minStock <- tickers[ind.min];
+  minStock <- tickers[ind.min]
   finDate <- c(as.character(res[[ind.min]]$Date[nrow(res[[ind.min]])]), as.character(res[[ind.min]]$Date[1]));
 # getting data frame with log returns 
   res <- lapply(res, function(x) return(data.frame(Date=x$Date[-1], log.ret=diff(log(x$Adj.Close)))));
   res <- Reduce(function(x, y) merge(x, y, by="Date"), res);
-  colnames(res) <- c("Date", tickers);
-  return(list(data=res, minStock=minStock, finDate=finDate));  
+  colnames(res) <- c("Date", tickers[!nfi]);
+  return(list(data=res, minStock=minStock, finDate=finDate, not.found=not.found));  
 }
 
 ##################### hc plot 

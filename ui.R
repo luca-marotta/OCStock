@@ -102,6 +102,8 @@ shinyUI(fluidPage(
       br(),
       br(),
       textOutput("tsMergeWarning"),
+      br(),
+      textOutput("tsNotFoundWarning"),
       helpText(h2("Correlation Matrix", align = "center")),
       plotOutput("corrplot", width = "100%"),
       helpText(h2("Hierarchical Tree", align = "center")),

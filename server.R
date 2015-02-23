@@ -16,11 +16,11 @@ shinyServer(function(input, output, session) {
   ### changing values in selection widget when select all is chosen
   observe({
     if(is.null(input$symb)) return(NULL)
-    if(input$symb=="Select all") updateSelectInput(session, "symb", 
+    if(any(input$symb%in%"Select all")) updateSelectInput(session, "symb", 
                                                    choices =  c("Select all","AAPL","ABBV","ABT","ACN","AIG","ALL","AMGN","AMZN","APA","APC","AXP","BA","BAC","BAX","BIIB","BK","BMY","BRK.B","C","CAT","CL","CMCSA","COF","COP","COST","CSCO","CVS","CVX","DD","DIS","DOW","DVN","EBAY","EMC","EMR","EXC","F","FB","FCX","FDX","FOXA","GD","GE","GILD","GM","GOOG","GS","HAL","HD","HON","HPQ","IBM","INTC","JNJ","JPM","KO","LLY","LMT","LOW","MA","MCD","MDLZ","MDT","MET","MMM","MO","MON","MRK","MS","MSFT","NKE","NOV","NSC","ORCL","OXY","PEP","PFE","PG","PM","QCOM","RTN","SBUX","SLB","SO","SPG","T","TGT","TWX","TXN","UNH","UNP",
                                                      "UPS","USB","UTX","V","VZ","WBA","WFC","WMT","XOM"),
                                                    selected = c("AAPL","ABT","ACN","AIG","ALL","AMGN","AMZN","APA","APC","AXP","BA","BAC","BAX","BIIB","BK","BMY","BRK.B","C","CAT","CL","CMCSA","COF","COP","COST","CSCO","CVS","CVX","DD","DIS","DOW","DVN","EBAY","EMC","EMR","EXC","F","FB","FCX","FDX","FOXA","GD","GE","GILD","GM","GS","HAL","HD","HON","HPQ","IBM","INTC","JNJ","JPM","KO","LLY","LMT","LOW","MA","MCD","MDLZ","MDT","MET","MMM","MO","MON","MRK","MS","MSFT","NKE","NOV","NSC","ORCL","OXY","PEP","PFE","PG","PM","QCOM","RTN","SBUX","SLB","SO","SPG","T","TGT","TWX","TXN","UNH","UNP",
-                                                                "UPS","USB","UTX","V","VZ","WBA","WFC","WMT","XOM"))
+                                                               "UPS","USB","UTX","V","VZ","WBA","WFC","WMT","XOM"))
   })
 
   dataInput <- reactive({
@@ -125,6 +125,15 @@ output$tsMergeWarning <- renderText({
   #if(1==1) return(input$dates[1] == dataInput()$finDate[1])
   paste(dataInput()$minStock, " has records only starting from ", dataInput()$finDate[1], 
        ". Your input date range has been changed accordingly.", sep="")
+})
+
+output$tsNotFoundWarning <- renderText({
+  if(input$get==0) return(NULL)
+  if(!is.null(dataInput()$not.found)){
+    st <- paste(dataInput()$not.found, collapse = ",");
+    return(paste("Selected stock(s) not present in the time period: ", st, ".", sep=""))
+  }
+  return(NULL)
 })
 
   output$corrplot <- renderPlot({
