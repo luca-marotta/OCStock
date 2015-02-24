@@ -33,11 +33,15 @@ getData <- function(tickers, from, to){
   ind.min <- which.min(records)
   minStock <- tickers[ind.min]
   finDate <- c(as.character(res[[ind.min]]$Date[nrow(res[[ind.min]])]), as.character(res[[ind.min]]$Date[1]));
-# getting data frame with log returns 
-  res <- lapply(res, function(x) return(data.frame(Date=x$Date[-1], log.ret=diff(log(x$Adj.Close)))));
-  res <- Reduce(function(x, y) merge(x, y, by="Date"), res);
+# getting data frames with prices and log returns 
+  prices <- lapply(res, function(x) return(data.frame(Date=x$Date, price=x$Adj.Close)))
+  prices <- Reduce(function(x, y) merge(x, y, by="Date"), prices);
+  colnames(prices) <- c("Date", tickers[!nfi]);
+  res <- data.frame(Date=prices$Date[-1], sapply(log(prices[,-1]), diff))
+#   res <- lapply(res, function(x) return(data.frame(Date=x$Date[-1], log.ret=diff(log(x$Adj.Close)))))
+#   res <- Reduce(function(x, y) merge(x, y, by="Date"), res);
   colnames(res) <- c("Date", tickers[!nfi]);
-  return(list(data=res, minStock=minStock, finDate=finDate, not.found=not.found));  
+  return(list(prices=prices, data=res, minStock=minStock, finDate=finDate, not.found=not.found));  
 }
 
 ##################### hc plot 

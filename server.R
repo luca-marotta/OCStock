@@ -31,13 +31,19 @@ shinyServer(function(input, output, session) {
   
   
   tsInput <- reactive({
+    # plot prices or log returns depending on the check box
+    if(input$showPrices==T){
+      ts <- dataInput()$prices
+    } else {
+      ts <- dataInput()$data;
+    }
     if(input$hideTsLeg==T){
       return(
-        dygraph(xts(dataInput()$data[,2:ncol(dataInput()$data)], order.by = as.Date(dataInput()$data$Date, format="%Y-%m-%d")))%>%
+        dygraph(xts(ts[,2:ncol(ts)], order.by = as.Date(ts$Date, format="%Y-%m-%d")))%>%
         dyLegend(show = "onmouseover", width = 0)
       )
     }
-    return(dygraph(xts(dataInput()$data[,2:ncol(dataInput()$data)], order.by = as.Date(dataInput()$data$Date, format="%Y-%m-%d")))%>%
+    return(dygraph(xts(ts[,2:ncol(ts)], order.by = as.Date(ts$Date, format="%Y-%m-%d")))%>%
              dyLegend(show = "always", hideOnMouseOut = T, width=400))
   })
   
@@ -129,7 +135,7 @@ output$tsMergeWarning <- renderText({
 
 output$tsNotFoundWarning <- renderText({
   if(input$get==0) return(NULL)
-  if(!is.null(dataInput()$not.found)){
+  if(length(dataInput()$not.found)>0){
     st <- paste(dataInput()$not.found, collapse = ",");
     return(paste("Selected stock(s) not present in the time period: ", st, ".", sep=""))
   }
