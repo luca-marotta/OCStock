@@ -67,7 +67,7 @@ shinyServer(function(input, output, session) {
     tmp <- dataInput()$data
 
     cmat <- cor(tmp[,2:ncol(tmp)])
-    diag(cmat) <- NA
+    diag(cmat) <- 100
     df <- reshape2::melt(cmat)
     if(input$corr){
       ######## ordering columns using hc
@@ -79,7 +79,7 @@ shinyServer(function(input, output, session) {
       p <- ggplot(data=df, aes(x=Var1, y=Var2, fill=value)) + 
         geom_raster(color="white") + xlab("") + ylab("") +
         scale_fill_gradient(low = "#0000FF", high ="#FF0000", 
-                             space = "rgb", guide = "colourbar", na.value = "#DADAC8") +
+                             space = "rgb", guide = "colourbar", limits=c(min(cmat), 1), na.value = "#DADAC8") +
         theme_classic(base_size = 15) + 
         theme(axis.text.x=element_text(size=input$corrLSize, angle=90, face="bold", vjust=0.5),
               axis.text.y=element_text(size=input$corrLSize, face="bold"))
@@ -88,7 +88,7 @@ shinyServer(function(input, output, session) {
     p <- ggplot(data=df, aes(x=Var1, y=Var2)) + 
          geom_tile(aes(fill=value)) +  xlab("") + ylab("") +
          scale_fill_gradient(low = "#0000FF", high ="#FF0000", 
-                        space = "rgb", guide = "colourbar", na.value = "#DADAC8") +
+                        space = "rgb", guide = "colourbar", limits=c(min(cmat), 1), na.value = "#DADAC8") +
       theme_classic(base_size = 15) + 
       theme(axis.text.x=element_text(size=input$corrLSize, angle=90, face="bold", vjust=0.5),
           axis.text.y=element_text(size=input$corrLSize, face="bold"))
